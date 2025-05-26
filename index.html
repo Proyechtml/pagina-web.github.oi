@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Asistencia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://example.com/tu-imagen.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            backdrop-filter: blur(5px);
+            padding: 0 20px;
+        }
+        form {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+        }
+        .menu-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            background-color: rgba(0,0,0,0.9);
+            border: 1px solid #ccc;
+            z-index: 1;
+        }
+        .dropdown button {
+            background: none;
+            color: white;
+            padding: 10px 20px;
+            width: 100%;
+            border: none;
+            text-align: left;
+        }
+        .dropdown button:hover {
+            background-color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        input[type="text"] {
+            margin-bottom: 20px;
+            padding: 10px;
+            width: calc(100% - 40px);
+            border: none;
+            border-radius: 5px;
+            margin-left: 20px;
+            margin-right: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 80%;
+            max-width: 200px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #message {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="attendanceForm">
+            <!-- Menú de tres puntitos -->
+            <button class="menu-button" onclick="toggleDropdown(event)">⋮</button>
+            <div class="dropdown" id="dropdownMenu">
+                <button onclick="setMode('view')">Modo Vista</button>
+                <button onclick="promptAdmin()">Modo Administrador</button>
+            </div>
+
+            <!-- Título editable -->
+            <h1 id="mainTitle" contenteditable="false">Control de Asistencia</h1>
+
+            <!-- Campos -->
+            <label for="name" id="labelName" contenteditable="false">NOMBRE DEL UNIVERSITARI(@):</label>
+            <input type="text" id="name" name="name" placeholder="Escribe tu nombre aquí" required>
+
+            <label for="grade" id="labelGrade" contenteditable="false">VAS A IR AL VIAJE A COCHABANBA:</label>
+            <input type="text" id="grade" name="grade" placeholder="Escribir si o no y en qué vas a ir" required>
+
+            <label for="curriculumContent" id="labelCertificate" contenteditable="false">VAS A QUERER EL CERTIFICADO:</label>
+            <input type="text" id="curriculumContent" name="curriculumContent" placeholder="Escribir si quieres el certificado" required>
+
+            <label for="date">Fecha:</label>
+            <input type="text" id="date" name="date" readonly required>
+
+            <label for="time">Hora:</label>
+            <input type="text" id="time" name="time" readonly required>
+
+            <button type="submit">Enviar</button>
+            <button type="button" id="updateButton" style="display:none; margin-top: 10px;" onclick="updateLabels()">Actualizar</button>
+
+            <div id="message"></div>
+        </form>
+    </div>
+
+    <script>
+        function toggleDropdown(event) {
+            event.preventDefault();
+            const menu = document.getElementById("dropdownMenu");
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+
+        function setMode(mode) {
+            document.getElementById("dropdownMenu").style.display = "none";
+            const editable = (mode === 'admin');
+
+            // Editar etiquetas
+            document.querySelectorAll('label[contenteditable]').forEach(el => {
+                el.contentEditable = editable;
+                el.style.borderBottom = editable ? "1px dashed white" : "none";
+            });
+
+            // Editar título
+            const title = document.getElementById("mainTitle");
+            title.contentEditable = editable;
+            title.style.borderBottom = editable ? "1px dashed white" : "none";
+
+            // Editar placeholders
+            if (editable) {
+                document.querySelectorAll('input[type="text"]').forEach(input => {
+                    const newPH = prompt(`Editar texto invisible para: ${input.id}`, input.placeholder);
+                    if (newPH !== null) {
+                        input.placeholder = newPH;
+                    }
+                });
+            }
+
+            document.getElementById("updateButton").style.display = editable ? "inline-block" : "none";
+        }
+
+        function promptAdmin() {
+            const pass = prompt("Ingrese la contraseña de administrador:");
+            if (pass === "13604903") {
+                setMode("admin");
+            } else {
+                alert("Contraseña incorrecta.");
+            }
+        }
+
+        function updateLabels() {
+            localStorage.setItem("labelName", document.getElementById("labelName").innerText);
+            localStorage.setItem("labelGrade", document.getElementById("labelGrade").innerText);
+            localStorage.setItem("labelCertificate", document.getElementById("labelCertificate").innerText);
+            localStorage.setItem("mainTitle", document.getElementById("mainTitle").innerText);
+
+            document.querySelectorAll('input[type="text"]').forEach(input => {
+                localStorage.setItem(`ph_${input.id}`, input.placeholder);
+            });
+
+            alert("Actualización guardada correctamente.");
+        }
+
+        function loadLabels() {
+            const labelName = localStorage.getItem("labelName");
+            const labelGrade = localStorage.getItem("labelGrade");
+            const labelCertificate = localStorage.getItem("labelCertificate");
+            const mainTitle = localStorage.getItem("mainTitle");
+
+            if (labelName) document.getElementById("labelName").innerText = labelName;
+            if (labelGrade) document.getElementById("labelGrade").innerText = labelGrade;
+            if (labelCertificate) document.getElementById("labelCertificate").innerText = labelCertificate;
+            if (mainTitle) document.getElementById("mainTitle").innerText = mainTitle;
+
+            document.querySelectorAll('input[type="text"]').forEach(input => {
+                const ph = localStorage.getItem(`ph_${input.id}`);
+                if (ph) input.placeholder = ph;
+            });
+        }
+
+        window.onload = function () {
+            loadLabels();
+        };
+
+        const now = new Date();
+        const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+        document.getElementById('date').value = formattedDate;
+
+        setInterval(() => {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const formattedTime = `${hours}:${minutes}:${seconds} ${ampm}`;
+            document.getElementById('time').value = formattedTime;
+        }, 1000);
+
+        document.getElementById('attendanceForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+
+            const name = document.getElementById('name').value.trim();
+            const grade = document.getElementById('grade').value.trim();
+            const curriculumContent = document.getElementById('curriculumContent').value.trim();
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+
+            const url = 'https://script.google.com/macros/s/AKfycbxAP2Sz7KGtAZCtVAJPVvS7Dux9vj-pwYeIUCEqCRSMS93NTqglk02QB5Rlg2ik0-MM/exec';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `name=${encodeURIComponent(name)}&grade=${encodeURIComponent(grade)}&curriculumContent=${encodeURIComponent(curriculumContent)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}`
+            })
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('message').innerText = data;
+                    this.reset();
+                    document.getElementById('date').value = formattedDate;
+                })
+                .catch(error => {
+                    document.getElementById('message').innerText = 'Error al enviar la asistencia';
+                })
+                .finally(() => {
+                    submitButton.disabled = false;
+                });
+        });
+    </script>
+</body>
+</html>
